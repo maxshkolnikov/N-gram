@@ -1,0 +1,43 @@
+import numpy as np
+import string
+file_in = open('example.txt', 'r', encoding='utf-8')
+sentences = file_in.readlines()
+file_in.close()
+words = []
+dictionary = {}
+for i in sentences:
+    words.extend(i.rstrip().split())
+for j in range (len(words)):
+    if '.' in words[j] or ',' in words[j] or ':' in words[j] or ';' in words[j] or '?' in words[j] or '!' in words[j]:
+        words[j] = words[j].strip(string.punctuation).lower()
+    else:
+        words[j] = words[j].strip(string.punctuation).lower()
+    
+unique_words = list(set(words))
+prefix_length = 1 ## можно менять
+for u in range(len(words) - prefix_length + 1):
+    probability = []
+    for p in range(len(unique_words)):
+        possible_combination = (str(words[u:u + prefix_length]).strip('['']') + ', ' + "'" + unique_words[p] + "'")
+        count1 = str(words).strip('['']').count(possible_combination)
+        count2 = str(words).strip('['']').count(str(words[u:u + prefix_length]).strip('['']'))
+        probability.append((float(count1)/float(count2)))
+    dictionary[str(words[u:u + prefix_length]).strip("['']")] = str(probability)
+output = []
+breaking = 0
+while len(output) <= 50: ## можно менять
+    breaking = 0
+    output.append(np.random.choice(unique_words, p = [words.count(i)/len(words) for i in unique_words]).capitalize())
+    while breaking == 0 and len(output) <= 50:
+        if '.' in output[-1]:
+            a = dictionary[str(output[-1][:-1]).lower()][1:-1].split(', ')
+        else:
+            a = dictionary[str(output[-1]).lower()][1:-1].split(', ')
+        for i in range(len(a)):
+            a[i] = float(a[i])
+        if max(a) != 0:
+            output.append(unique_words[a.index(max(a))])
+        else:
+            breaking = 1
+    output[-1] = output[-1] + '.'
+print(*output)
